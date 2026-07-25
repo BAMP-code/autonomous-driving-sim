@@ -1,7 +1,8 @@
-torch>=2.4
-torchvision>=0.19
-numpy>=1.26
-Pillow>=10
-matplotlib>=3.9
+# Pinned to the versions the pipeline was validated with (Apple Silicon / MPS).
+# torch/torchvision are pinned exactly — a partial reinstall previously broke the native libs.
+torch==2.13.0
+torchvision==0.28.0
+sentence-transformers==5.5.0
+numpy==1.26.4
+Pillow==12.2.0
 tqdm>=4.0
-sentence-transformers>=3.0

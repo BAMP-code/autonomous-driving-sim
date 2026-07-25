@@ -8,6 +8,7 @@ checkpoints/
 *.pt
 *.pth
 *.npz
+*.tar
 
 .DS_Store
 .idea/
