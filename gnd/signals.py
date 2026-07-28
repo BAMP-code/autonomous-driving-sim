@@ -42,6 +42,24 @@ def _color_match(sample, image):
     return out
 
 
+def _relational(sample, image):
+    """Each candidate's rank among all candidates: x-position, y-position, size (each 0..1).
+
+    Gives the scorer the comparative/ordinal structure that absolute geometry lacks — e.g.
+    "the leftmost car", "the second one from the left", "the biggest". Boxes only, no image.
+    """
+    boxes = sample["proposals"]
+    n = len(boxes)
+    cx = (boxes[:, 0] + boxes[:, 2]) / 2.0
+    cy = (boxes[:, 1] + boxes[:, 3]) / 2.0
+    area = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
+    out = np.zeros((n, 3), dtype=np.float32)
+    denom = max(n - 1, 1)
+    for j, vals in enumerate((cx, cy, area)):
+        out[:, j] = np.argsort(np.argsort(vals)) / denom  # normalized rank per candidate
+    return out
+
+
 def _spatial_match(sample, image):
     boxes = sample["proposals"]
     kw = rules.extract_keywords(sample["command"])
@@ -67,6 +85,7 @@ REGISTRY = {
     "class_match": (_class_match, 1, False),
     "color_match": (_color_match, 1, True),
     "spatial_match": (_spatial_match, 1, False),
+    "relational": (_relational, 3, False),
 }
 
 

@@ -12,7 +12,7 @@ import numpy as np
 import torch
 from PIL import Image
 
-from .data import Talk2CarDataset, load_image_tar, decode_image
+from .data import Talk2CarDataset, ensure_image_tar, load_image_tar, decode_image
 
 # short name -> (sentence-transformers model id, embedding dim)
 BACKBONES = {
@@ -66,7 +66,11 @@ def extract(split: str, backbone: str = "clip-b32", data_dir="data",
     clip = SentenceTransformer(model_id, device=dev)
 
     ds = Talk2CarDataset(split=split, data_dir=data_dir)
-    images = load_image_tar(image_tar) if image_tar else None
+    # Always read images from the split tar: per-file directory reads from the unsigned venv
+    # interpreter are throttled by macOS and stall extraction. ensure_image_tar builds it once.
+    if image_tar is None:
+        image_tar = ensure_image_tar(split, data_dir)
+    images = load_image_tar(image_tar)
 
     n = len(ds.samples)
     img_feats = np.zeros((n, 64, dim), dtype=np.float16)
